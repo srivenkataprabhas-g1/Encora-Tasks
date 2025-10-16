@@ -10,10 +10,12 @@ name: Build 09-10-2025
 
 on:
   push:
-    branches: [ main ]
+    paths:
+      - '09-10-2025/SpringSecurityJWTDemo-main/**'
   pull_request:
-    branches: [ main ]
-  workflow_dispatch: {}
+    paths:
+      - '09-10-2025/SpringSecurityJWTDemo-main/**'
+  workflow_dispatch:
 
 jobs:
   build:
