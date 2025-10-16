@@ -48,7 +48,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: ~/.m2/repository
-        key: ${{ runner.os }}-maven-${{ hashFiles('10-10-2025/Inter-Microservice-Communication/Emp-Employee-Service/pom.xml') }}
+        key: ${{ runner.os }}-maven-${{ hashFiles('10-10-2025/Inter-Microservice-Communication/Emp-Order-Service/pom.xml') }}
         restore-keys: |
           ${{ runner.os }}-maven-
 
@@ -60,5 +60,5 @@ jobs:
         done
 
     - name: Build and Test with Maven
-      working-directory: 10-10-2025/Inter-Microservice-Communication/Emp-Employee-Service/
+      working-directory: 10-10-2025/Inter-Microservice-Communication/Emp-Order-Service/
       run: mvn clean verify
