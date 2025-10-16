@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven and MySQL
+name: Build 09-10-2025
 
 on:
   push:
