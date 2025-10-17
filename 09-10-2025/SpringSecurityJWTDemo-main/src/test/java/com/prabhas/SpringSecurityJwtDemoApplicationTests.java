@@ -52,7 +52,7 @@ public class SpringSecurityJwtDemoApplicationTests {
                     email,
                     "First",
                     "Last",
-                    "9876543210",
+                    "9876543211",
                     roles
             );
 
