@@ -1,0 +1,145 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Real-time E-commerce Order Processing Pipeline (DynamoDB → EventBridge Pipe → Lambda)
+ 
+Resources:
+  ####################################
+  # 1️⃣ DynamoDB Table
+  ####################################
+  OrdersTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Orders
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: orderId
+          AttributeType: S
+      KeySchema:
+        - AttributeName: orderId
+          KeyType: HASH
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+ 
+  ####################################
+  # 2️⃣ Normal Orders Lambda
+  ####################################
+  NormalOrdersFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: NormalOrdersProcessor
+      Handler: index.handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              print("Received Normal Order Event:", json.dumps(event))
+              return {"statusCode": 200, "body": "Normal Order processed"}
+ 
+  ####################################
+  # 3️⃣ Premium Orders Lambda
+  ####################################
+  PremiumOrdersFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: PremiumOrdersProcessor
+      Handler: index.handler
+      Runtime: python3.12
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import json
+          def handler(event, context):
+              print("Received Premium Order Event:", json.dumps(event))
+              return {"statusCode": 200, "body": "Premium Order processed"}
+ 
+  ####################################
+  # 4️⃣ Lambda Execution Role
+  ####################################
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: OrdersLambdaRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/AmazonEventBridgeFullAccess
+ 
+  ####################################
+  # 5️⃣ EventBridge Pipe - Normal Orders
+  ####################################
+  NormalOrdersPipe:
+    Type: AWS::Pipes::Pipe
+    Properties:
+      Name: NormalOrdersPipe
+      RoleArn: !GetAtt PipeRole.Arn
+      Source: !GetAtt OrdersTable.StreamArn
+      SourceParameters:
+        DynamoDBStreamParameters:
+          StartingPosition: LATEST
+      Target: !GetAtt NormalOrdersFunction.Arn
+ 
+  ####################################
+  # 6️⃣ EventBridge Pipe - Premium Orders
+  ####################################
+  PremiumOrdersPipe:
+    Type: AWS::Pipes::Pipe
+    Properties:
+      Name: PremiumOrdersPipe
+      RoleArn: !GetAtt PipeRole.Arn
+      Source: !GetAtt OrdersTable.StreamArn
+      SourceParameters:
+        DynamoDBStreamParameters:
+          StartingPosition: LATEST
+      Target: !GetAtt PremiumOrdersFunction.Arn
+ 
+  ####################################
+  # 7️⃣ Pipe Execution Role
+  ####################################
+  PipeRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: OrdersPipeRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: pipes.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: OrdersPipePolicy
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - dynamodb:DescribeStream
+                  - dynamodb:GetRecords
+                  - dynamodb:GetShardIterator
+                  - dynamodb:ListStreams
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                  - lambda:InvokeFunction
+                Resource: "*"
+ 
+Outputs:
+  NormalLambdaArn:
+    Value: !GetAtt NormalOrdersFunction.Arn
+    Description: ARN of the Normal Orders Lambda Function
+ 
+  PremiumLambdaArn:
+    Value: !GetAtt PremiumOrdersFunction.Arn
+    Description: ARN of the Premium Orders Lambda Function
+ 
+  OrdersTableName:
+    Value: !Ref OrdersTable
+    Description: DynamoDB Orders Table
