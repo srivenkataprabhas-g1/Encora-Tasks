@@ -255,7 +255,7 @@ def lambda_handler(event, context):
 # EC2 Instance
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/d4e417cb-42fb-49b6-bc72-321c97db1916" />
 <strong>Server Code</strong>
-<pre>
+```
  <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -560,7 +560,7 @@ def lambda_handler(event, context):
     </script>
 </body>
 </html>
-</pre>
+```
 # IAM
 ### LambdaDynamoDbrole
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/cda9f5c7-73f4-4c52-944b-0b79cd91497f" />
