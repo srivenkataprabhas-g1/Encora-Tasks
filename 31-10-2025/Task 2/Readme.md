@@ -34,4 +34,46 @@ Lambda function code for processing
 Architecture diagram showing the complete pipeline
 
 How would you design this solution to ensure only relevant order events are processed while maintaining scalability and cost-efficiency?
+
+ # Solution:
+[Used this YAML file](https://github.com/srivenkataprabhas-g1/Encora-Tasks/edit/main/31-10-2025/Task%202/cloudformation-template.yaml)
+
+ ### Pipeline Configuration
  
+ <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/0f1417b9-176d-45f3-a7bf-d92034b27e54" />
+
+### Logs
+<pre>
+  Received Normal Order Event: [{
+    "eventID": "fa58d82a0f8dabc763bd3af48953885c",
+    "eventName": "INSERT",
+    "eventVersion": "1.1",
+    "eventSource": "aws:dynamodb",
+    "awsRegion": "us-east-1",
+    "dynamodb": {
+        "ApproximateCreationDateTime": 1761915500,
+        "Keys": {
+            "orderId": {
+                "S": "order123"
+            }
+        },
+        "NewImage": {
+            "amount": {
+                "N": "500"
+            },
+            "customerType": {
+                "S": "normal"
+            },
+            "orderId": {
+                "S": "order123"
+            }
+        },
+        "SequenceNumber": "16000004404151851219162",
+        "SizeBytes": 56,
+        "StreamViewType": "NEW_AND_OLD_IMAGES"
+    },
+    "eventSourceARN": "arn:aws:dynamodb:us-east-1:433980226768:table/Orders/stream/2025-10-31T12:53:41.284"
+}]
+</pre>
+
+
