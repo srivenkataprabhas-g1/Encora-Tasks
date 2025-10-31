@@ -353,7 +353,113 @@ Note: The HTML form should use CSS and Bootstrap.
 
 <strong>Code:</strong>
 <pre>
- 
+ import json
+import boto3
+import uuid
+from datetime import datetime
+from botocore.exceptions import ClientError
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('UserSubmissions')
+
+def lambda_handler(event, context):
+    # Log the incoming event for debugging
+    print("Received event:", json.dumps(event))
+
+    try:
+        # Parse the body if present as JSON string else take event as form data
+        if 'body' in event and isinstance(event['body'], str):
+            body = json.loads(event['body'])
+        else:
+            body = event
+
+        print("Parsed body:", body)
+
+        # Extract and validate form data
+        name = body.get('name', '').strip()
+        email = body.get('email', '').strip()
+        message = body.get('message', '').strip()
+
+        # Validation
+        validation_errors = []
+
+        if not name:
+            validation_errors.append("Name is required")
+        if not email or '@' not in email:
+            validation_errors.append("Valid email is required")
+        if not message:
+            validation_errors.append("Message is required")
+
+        if validation_errors:
+            return {
+                'statusCode': 400,
+                'headers': {
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*'
+                },
+                'body': json.dumps({
+                    'success': False,
+                    'errors': validation_errors
+                })
+            }
+
+        # Generate unique submission ID
+        submission_id = str(uuid.uuid4())
+        submission_date = datetime.utcnow().isoformat() + 'Z'
+
+        # Prepare item for DynamoDB
+        item = {
+            'submissionId': submission_id,
+            'name': name,
+            'email': email,
+            'message': message,
+            'submissionDate': submission_date,
+            'status': 'received'
+        }
+
+        # Store in DynamoDB
+        table.put_item(Item=item)
+
+        return {
+            'statusCode': 201,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'success': True,
+                'submissionId': submission_id,
+                'message': 'Submission received successfully'
+            })
+        }
+
+    except ClientError as e:
+        print(f"DynamoDB Error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'success': False,
+                'error': 'Database error occurred'
+            })
+        }
+
+    except Exception as e:
+        print(f"Unexpected Error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'success': False,
+                'error': 'An unexpected error occurred'
+            })
+        }
 </pre>
 ### Query Role
 
