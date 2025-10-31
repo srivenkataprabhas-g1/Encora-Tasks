@@ -560,7 +560,7 @@ def lambda_handler(event, context):
     </script>
 </body>
 </html>
-</body>
+</pre>
 # IAM
 ### LambdaDynamoDbrole
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/cda9f5c7-73f4-4c52-944b-0b79cd91497f" />
