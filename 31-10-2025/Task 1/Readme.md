@@ -42,3 +42,6 @@ Lambda execution role with DynamoDB read/write permissions
 EC2 instance profile (if needed)
 Note: The HTML form should use CSS and Bootstrap.
 # Solution
+### DynamoDB
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/2f99e5a7-5f2d-4d97-9016-1316b661672d" />
+## Lambda 
