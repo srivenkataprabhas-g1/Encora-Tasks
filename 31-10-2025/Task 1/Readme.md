@@ -184,10 +184,7 @@ Note: The HTML form should use CSS and Bootstrap.
 </head>
 <body>
     <div class="container-form">
-        <!-- Alert Messages -->
         <div id="alertContainer"></div>
-
-        <!-- Form Section -->
         <div id="formSection">
             <h2 class="form-title">📝 Submit Your Information</h2>
             <form id="submissionForm">
@@ -199,10 +196,8 @@ Note: The HTML form should use CSS and Bootstrap.
                         id="name" 
                         name="name"
                         required
-                        placeholder="Enter your full name"
-                    >
+                        placeholder="Enter your full name">
                 </div>
-
                 <div class="form-group">
                     <label for="email" class="form-label">Email Address *</label>
                     <input 
@@ -211,10 +206,8 @@ Note: The HTML form should use CSS and Bootstrap.
                         id="email" 
                         name="email"
                         required
-                        placeholder="example@domain.com"
-                    >
+                        placeholder="example@domain.com">
                 </div>
-
                 <div class="form-group">
                     <label for="message" class="form-label">Message *</label>
                     <textarea 
@@ -225,18 +218,15 @@ Note: The HTML form should use CSS and Bootstrap.
                         placeholder="Enter your message here..."
                     ></textarea>
                 </div>
-
                 <button 
                     type="submit" 
                     class="btn-submit"
-                    id="submitBtn"
-                >
+                    id="submitBtn">
                     Submit
                     <span class="spinner-border spinner-border-sm" id="spinner" role="status" aria-hidden="true"></span>
                 </button>
             </form>
         </div>
-
         <!-- Submissions Section -->
         <div class="submissions-section">
             <h3 class="submissions-title">📋 Recent Submissions</h3>
@@ -245,16 +235,13 @@ Note: The HTML form should use CSS and Bootstrap.
             </div>
         </div>
     </div>
-
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
     <script>
         // UPDATE THIS WITH YOUR API GATEWAY URL
         const API_URL = 'https://kzys2ykar8.execute-api.us-east-1.amazonaws.com/prod';
         const SUBMIT_ENDPOINT = '${API_URL}/submit';
         const QUERY_ENDPOINT = '${API_URL}/submissions';
-
         // Show alert message
         function showAlert(message, type = 'info') {
             const alertContainer = document.getElementById('alertContainer');
@@ -265,27 +252,22 @@ Note: The HTML form should use CSS and Bootstrap.
                 </div>
             `;
             alertContainer.innerHTML = alertHtml;
-            
             // Auto-dismiss after 5 seconds
             setTimeout(() => {
                 alertContainer.innerHTML = '';
             }, 5000);
         }
-
         // Handle form submission
         document.getElementById('submissionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const message = document.getElementById('message').value.trim();
-
             // Disable button and show spinner
             const submitBtn = document.getElementById('submitBtn');
             const spinner = document.getElementById('spinner');
             submitBtn.disabled = true;
             spinner.style.display = 'inline-block';
-
             try {
                 const response = await fetch(SUBMIT_ENDPOINT, {
                     method: 'POST',
@@ -294,9 +276,7 @@ Note: The HTML form should use CSS and Bootstrap.
                     },
                     body: JSON.stringify({ name, email, message })
                 });
-
                 const data = await response.json();
-
                 if (response.ok) {
                     showAlert('✅ Submission successful! Thank you.', 'success');
                     document.getElementById('submissionForm').reset();
@@ -313,20 +293,16 @@ Note: The HTML form should use CSS and Bootstrap.
                 spinner.style.display = 'none';
             }
         });
-
         // Load and display submissions
         async function loadSubmissions() {
             try {
                 const response = await fetch(QUERY_ENDPOINT);
                 const data = await response.json();
-
                 const submissionsList = document.getElementById('submissionsList');
-
                 if (!data.success || !data.submissions || data.submissions.length === 0) {
                     submissionsList.innerHTML = '<p class="text-muted">No submissions yet.</p>';
                     return;
                 }
-
                 let html = '';
                 data.submissions.forEach(submission => {
                     const date = new Date(submission.submissionDate).toLocaleString();
@@ -339,7 +315,6 @@ Note: The HTML form should use CSS and Bootstrap.
                         </div>
                     `;
                 });
-
                 submissionsList.innerHTML = html;
             } catch (error) {
                 console.error('Error loading submissions:', error);
@@ -347,7 +322,6 @@ Note: The HTML form should use CSS and Bootstrap.
                     '<p class="text-danger">Error loading submissions.</p>';
             }
         }
-
         // Escape HTML to prevent XSS
         function escapeHtml(text) {
             const map = {
@@ -359,10 +333,8 @@ Note: The HTML form should use CSS and Bootstrap.
             };
             return text.replace(/[&<>"']/g, m => map[m]);
         }
-
         // Load submissions on page load
         loadSubmissions();
-
         // Refresh submissions every 10 seconds
         setInterval(loadSubmissions, 10000);
     </script>
@@ -379,6 +351,104 @@ Note: The HTML form should use CSS and Bootstrap.
 
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/ea2ffefa-e667-4e00-aa58-aa1efc497144" />
 
+<strong>Code:</strong>
+<pre>
+ 
+</pre>
 ### Query Role
 
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/fdf86e3c-c33e-401f-b641-458e57704010" />
+
+<strong>Code:</strong>
+<pre>
+import json
+import boto3
+from botocore.exceptions import ClientError
+
+dynamodb = boto3.resource('dynamodb')
+table = dynamodb.Table('UserSubmissions')
+
+def lambda_handler(event, context):
+    """
+    Retrieves submissions from DynamoDB
+    Supports filtering by email or fetching all records
+    """
+    
+    try:
+        # Get query parameters
+        query_params = event.get('queryStringParameters', {}) or {}
+        email = query_params.get('email')
+        
+        if email:
+            # Query by email using GSI (if available)
+            # Falls back to scan with filter if GSI not configured
+            try:
+                response = table.query(
+                    IndexName='EmailIndex',
+                    KeyConditionExpression='email = :email',
+                    ExpressionAttributeValues={
+                        ':email': email
+                    }
+                )
+            except:
+                # Fallback to scan with filter
+                response = table.scan(
+                    FilterExpression='email = :email',
+                    ExpressionAttributeValues={
+                        ':email': email
+                    }
+                )
+        else:
+            # Get all submissions (with limit for performance)
+            response = table.scan(Limit=100)
+        
+        # Format items for response
+        items = response.get('Items', [])
+        
+        # Sort by submission date (newest first)
+        items.sort(
+            key=lambda x: x.get('submissionDate', ''),
+            reverse=True
+        )
+        
+        return {
+            'statusCode': 200,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'success': True,
+                'count': len(items),
+                'submissions': items
+            })
+        }
+    
+    except ClientError as e:
+        print(f"DynamoDB Error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'success': False,
+                'error': 'Database query failed'
+            })
+        }
+    
+    except Exception as e:
+        print(f"Unexpected Error: {e}")
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+            'body': json.dumps({
+                'success': False,
+                'error': 'An unexpected error occurred'
+            })
+        } 
+</pre>
