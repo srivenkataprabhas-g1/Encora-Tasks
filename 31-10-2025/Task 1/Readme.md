@@ -558,3 +558,5 @@ def lambda_handler(event, context):
             })
         } 
 </pre>
+# Output
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/b1a487c5-d27c-4eb8-a8fa-e8340df5f707" />
