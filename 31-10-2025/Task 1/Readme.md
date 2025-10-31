@@ -43,21 +43,37 @@ EC2 instance profile (if needed)
 Note: The HTML form should use CSS and Bootstrap.
 # Solution
 ## DynamoDB
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/94b8c4b7-3eeb-45fa-a8d6-744f9f5d7534" />
+
 ## Lambda 
 ### Submission Lambda
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/e4915754-8958-48c3-95b9-554e41d0e838" />
+
 ### Query Lambda
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/6a416dd2-b169-4c36-b0dc-a55db62f454c" />
+
 ## API Gateway
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/0cf8c6ac-c6eb-439c-b858-5800b474cfdc" />
+
 ## EC2 Instance
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/d4e417cb-42fb-49b6-bc72-321c97db1916" />
+
 <a href="https://github.com/srivenkataprabhas-g1/Encora-Tasks/main/31-10-2025/Task%201/index.html">Server Code</a>
+
 ## IAM
 ### LambdaDynamoDbrole
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/cda9f5c7-73f4-4c52-944b-0b79cd91497f" />
+
 ### Submission Role
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/ea2ffefa-e667-4e00-aa58-aa1efc497144" />
+
 ### Query Role
+
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/fdf86e3c-c33e-401f-b641-458e57704010" />
