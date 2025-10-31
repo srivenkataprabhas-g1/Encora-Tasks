@@ -44,11 +44,12 @@ Note: The HTML form should use CSS and Bootstrap.
 # Solution
 ### DynamoDB
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/94b8c4b7-3eeb-45fa-a8d6-744f9f5d7534" />
-## Lambda 
+### Lambda 
 - Submission Lambda
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/e4915754-8958-48c3-95b9-554e41d0e838" />
 <strong>Code:</strong>
-<pre>import json
+```
+import json
 import boto3
 import uuid
 from datetime import datetime
@@ -154,11 +155,12 @@ def lambda_handler(event, context):
                 'success': False,
                 'error': 'An unexpected error occurred'
             })
-        }</pre>
+        }
+```
 ## Query Lambda
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/6a416dd2-b169-4c36-b0dc-a55db62f454c" />
 <strong>Code:</strong>
-<pre>
+```
  import json
 import boto3
 from botocore.exceptions import ClientError
@@ -249,7 +251,7 @@ def lambda_handler(event, context):
                 'error': 'An unexpected error occurred'
             })
         }
-</pre>
+```
 # API Gateway
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/0cf8c6ac-c6eb-439c-b858-5800b474cfdc" />
 # EC2 Instance
