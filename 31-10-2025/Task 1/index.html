@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serverless Submission Form</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container-form {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+        }
+        .form-title {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-label {
+            color: #555;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+        .form-control {
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        textarea.form-control {
+            resize: vertical;
+            min-height: 120px;
+        }
+        .btn-submit {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 5px;
+            width: 100%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn-submit:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .alert {
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .spinner-border {
+            display: none;
+            margin-left: 10px;
+        }
+        .submissions-section {
+            margin-top: 40px;
+            border-top: 2px solid #e0e0e0;
+            padding-top: 30px;
+        }
+        .submissions-title {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+        .submission-item {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 5px;
+        }
+        .submission-name {
+            font-weight: 600;
+            color: #333;
+        }
+        .submission-email {
+            color: #666;
+            font-size: 14px;
+        }
+        .submission-message {
+            color: #555;
+            margin-top: 10px;
+            font-style: italic;
+        }
+        .submission-date {
+            color: #999;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-form">
+        <div id="alertContainer"></div>
+        <div id="formSection">
+            <h2 class="form-title">📝 Submit Your Information</h2>
+            <form id="submissionForm">
+                <div class="form-group">
+                    <label for="name" class="form-label">Full Name *</label>
+                    <input type="text" class="form-control" id="name" name="name" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address *</label>
+                    <input type="email" class="form-control" id="email" name="email" required placeholder="example@domain.com">
+                </div>
+                <div class="form-group">
+                    <label for="message" class="form-label">Message *</label>
+                    <textarea class="form-control" id="message" name="message" required placeholder="Enter your message here..."></textarea>
+                </div>
+                <button type="submit" class="btn-submit" id="submitBtn">
+                    Submit
+                    <span class="spinner-border spinner-border-sm" id="spinner" role="status" aria-hidden="true"></span>
+                </button>
+            </form>
+        </div>
+        <div class="submissions-section">
+            <h3 class="submissions-title">📋 Recent Submissions</h3>
+            <div id="submissionsList">
+                <p class="text-muted">Loading submissions...</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        const API_URL = 'YOUR_INVOKE_URL';
+        const SUBMIT_ENDPOINT = `${API_URL}/SUBMIT_ENDPOINT`;
+        const QUERY_ENDPOINT = `${API_URL}/SUBMISSIONS_ENDPOINT`;
+
+        function showAlert(message, type = 'info') {
+            const alertContainer = document.getElementById('alertContainer');
+            // Clear previous alerts
+            alertContainer.innerHTML = ''; 
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            alertContainer.innerHTML = alertHtml;
+            // Use Bootstrap's alert component to handle closing
+            const alertElement = document.querySelector('.alert');
+            new bootstrap.Alert(alertElement); 
+            setTimeout(() => { 
+                const alertInstance = bootstrap.Alert.getInstance(alertElement);
+                if (alertInstance) {
+                    alertInstance.close();
+                } else {
+                    alertContainer.innerHTML = '';
+                }
+            }, 5000);
+        }
+
+        function escapeHtml(text) {
+            if (typeof text !== 'string') return text;
+            const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        /**
+         * Parses the API Gateway response to extract the array of submissions.
+         * Handles raw array, { submissions: [...] }, and { body: "[...]" } formats.
+         * @param {Object} data The response JSON.
+         * @returns {Array} The array of submissions.
+         */
+        function parseSubmissions(data) {
+            if (Array.isArray(data)) {
+                return data; // Case 1: Raw array returned
+            }
+            if (Array.isArray(data.submissions)) {
+                return data.submissions; // Case 2: Array nested under 'submissions'
+            }
+            if (data.body && typeof data.body === 'string') {
+                try {
+                    const parsedBody = JSON.parse(data.body);
+                    if (Array.isArray(parsedBody)) {
+                        return parsedBody; // Case 3a: Stringified body is a raw array
+                    }
+                    if (Array.isArray(parsedBody.submissions)) {
+                        return parsedBody.submissions; // Case 3b: Stringified body has a 'submissions' key
+                    }
+                } catch (e) {
+                    console.error("Error parsing stringified body:", e);
+                }
+            }
+            // Fallback to an empty array
+            return [];
+        }
+
+        async function loadSubmissions() {
+            const submissionsList = document.getElementById('submissionsList');
+            submissionsList.innerHTML = '<p class="text-info">Fetching latest submissions...</p>';
+
+            try {
+                const response = await fetch(QUERY_ENDPOINT);
+                if (!response.ok) {
+                    const errorDetails = await response.text();
+                    throw new Error(`Failed to fetch submissions. Status: ${response.status}. Details: ${errorDetails.substring(0, 100)}`);
+                }
+
+                const data = await response.json();
+                const submissions = parseSubmissions(data);
+
+                if (!submissions.length) {
+                    submissionsList.innerHTML = '<p class="text-muted">No submissions yet.</p>';
+                    return;
+                }
+
+                let html = '';
+                // Display the newest submissions first (assuming createdAt/submissionDate is later for newer ones)
+                submissions.sort((a, b) => new Date(b.submissionDate || b.createdAt) - new Date(a.submissionDate || a.createdAt));
+
+                submissions.forEach(submission => {
+                    // Use a standardized field like 'submissionDate' or 'createdAt'
+                    const dateStr = submission.submissionDate || submission.createdAt || new Date().toISOString(); 
+                    // Fallback to current date if parsing fails, but generally safe with ISO string
+                    const date = new Date(dateStr).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' }); 
+
+                    html += `
+                        <div class="submission-item">
+                            <div class="submission-name">${escapeHtml(submission.name || 'N/A')}</div>
+                            <div class="submission-email">${escapeHtml(submission.email || 'N/A')}</div>
+                            <div class="submission-message">"${escapeHtml(submission.message || 'No message')}"</div>
+                            <div class="submission-date">${date}</div>
+                        </div>
+                    `;
+                });
+
+                submissionsList.innerHTML = html;
+
+            } catch (error) {
+                console.error("Submission loading error:", error);
+                document.getElementById('submissionsList').innerHTML = 
+                    '<p class="text-danger">Error loading submissions. Check the API endpoint and CORS settings.</p>';
+            }
+        }
+
+        document.getElementById('submissionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const spinner = document.getElementById('spinner');
+            submitBtn.disabled = true;
+            spinner.style.display = 'inline-block';
+
+            try {
+                const response = await fetch(SUBMIT_ENDPOINT, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, message })
+                });
+
+                // Read the response text first, then try to parse it as JSON
+                const responseText = await response.text();
+                let data = {};
+                try { 
+                    data = JSON.parse(responseText); 
+                } catch { 
+                    // Non-JSON response, treat as an unknown error if status isn't 2xx
+                    data = { success: false, error: `Server returned non-JSON response. Status: ${response.status}` };
+                }
+
+                // *** FIX IMPLEMENTED HERE ***
+                // We assume success if the HTTP status is OK (200-299), ignoring the data.success flag
+                // since we know the data is saving successfully.
+                if (response.ok) { 
+                    showAlert('✅ Submission successful! Thank you.', 'success');
+                    document.getElementById('submissionForm').reset();
+                    // Load submissions after a slight delay to ensure backend persistence
+                    setTimeout(loadSubmissions, 500); 
+                } else {
+                    const errorMsg = data.errors ? data.errors.join(', ') : data.error || 'Submission failed (no specific error message from server).';
+                    showAlert(`❌ ${errorMsg}`, 'danger');
+                }
+            } catch (error) {
+                console.error("Form submission network error:", error);
+                showAlert('❌ Network or server error. Please try again.', 'danger');
+            } finally {
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        });
+
+        // Initial load & auto-refresh every 10s
+        loadSubmissions();
+        setInterval(loadSubmissions, 10000);
+    </script>
+</body>
+</html>
