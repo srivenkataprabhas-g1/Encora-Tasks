@@ -1,4 +1,4 @@
-# Question - DynamoDB, EC2, API Gateway and Lambda
+<img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/0d391024-17e5-4c1e-a93c-75c443d3a8c4" /># Question - DynamoDB, EC2, API Gateway and Lambda
 ### Assignment Overview
  Create a serverless web application that does CRUD  operation on data through an HTML form hosted on EC2, processes it via Lambda functions, and stores it in DynamoDB.
 ### Architecture Components
@@ -63,7 +63,7 @@ Note: The HTML form should use CSS and Bootstrap.
 
 <img width="1366" height="768" alt="image" src="https://github.com/user-attachments/assets/d4e417cb-42fb-49b6-bc72-321c97db1916" />
 
-<a href="https://github.com/srivenkataprabhas-g1/Encora-Tasks/main/31-10-2025/Task%201/index.html">Use this Index.html</a>
+<a href="https://github.com/srivenkataprabhas-g1/Encora-Tasks/blob/main/31-10-2025/Task%201/index.html">Use this Index.html</a>
 <strong>Note:</strong>
 <p>Change invoke urls and endpoints as per API Gateway</p>
 
