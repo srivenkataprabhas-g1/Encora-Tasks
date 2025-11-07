@@ -1,0 +1,66 @@
+body {
+    background-color: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;      /* Horizontally center */
+    justify-content: center;  /* Vertically center */
+    min-height: 100vh;        /* Full viewport height */
+    margin: 0;                /* Remove default margin */
+    font-family: Arial, sans-serif;
+}
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+h1 {
+    color: violet;
+    animation: fadeIn 2s ease-in forwards;
+}
+
+h2 {
+    color: indigo;
+    animation: fadeIn 2s ease-in;
+    animation-fill-mode: backwards;
+}
+
+h3 {
+    color: blue;
+    animation: fadeIn 2s ease-in forwards;
+}
+
+h4 {
+    color: green;
+    animation: fadeIn 2s ease-in;
+    animation-fill-mode: backwards;
+}
+
+h5 {
+    color: yellow;
+    animation: fadeIn 2s ease-in forwards;
+}
+
+h6 {
+    color: orange;
+    animation: fadeIn 2s ease-in;
+    animation-fill-mode: backwards;
+}
+
+p {
+    color: red;
+    animation: fadeIn 2s ease-in forwards;
+    text-transform: capitalize;
+    text-decoration: underline dotted white;
+    text-shadow: 1px 1px 2px red;
+    text-align: center;
+}
+
+#box {
+    width: 200px;
+    height: 100px;
+    background-color: lightblue;
+    padding: 20px;
+    border: 10px solid darkblue;
+    margin: 15px;
+    text-align: center;
+}

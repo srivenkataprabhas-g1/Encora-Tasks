@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Student Registration</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>Student Registration Form</h1>
+  </header>
+
+  <form class="registration-form">
+    <label>Full Name:</label>
+    <input type="text" name="name" required>
+
+    <label>Email:</label>
+    <input type="email" name="email" required>
+
+    <label>Phone:</label>
+    <input type="tel" name="phone" required>
+
+    <label>Grade:</label>
+    <select name="grade">
+      <option>Grade 6</option>
+      <option>Grade 7</option>
+      <option>Grade 8</option>
+      <option>Grade 9</option>
+    </select>
+
+    <label>Address:</label>
+    <textarea name="address"></textarea>
+
+    <button type="submit">Submit</button>
+  </form>
+
+  <footer>
+    <p>Back to <a href="index.html">Home</a></p>
+  </footer>
+</body>
+</html>
