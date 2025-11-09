@@ -36,7 +36,7 @@ Architecture diagram showing the complete pipeline
 How would you design this solution to ensure only relevant order events are processed while maintaining scalability and cost-efficiency?
 
  # Solution:
-[Used this YAML file](https://github.com/srivenkataprabhas-g1/Encora-Tasks/edit/main/31-10-2025/Task%202/cloudformation-template.yaml)
+[Used this YAML file](https://github.com/srivenkataprabhas-g1/Encora-Tasks/blob/main/31-10-2025/Task%202/ecommerce-pipeline.yaml)
 
  ### Pipeline Configuration
  
