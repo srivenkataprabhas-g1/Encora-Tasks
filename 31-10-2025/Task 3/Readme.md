@@ -59,7 +59,7 @@ Configure an event notification to trigger Lambda on .txt file uploads
 ## Java Source Codes:
 - TextFileProcessor Code:
  <pre>
-package com.fileprocessor;
+package com.example;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -82,7 +82,7 @@ public  class TextFileProcessor implements RequestHandler<S3Event, String> {
 
     private final S3Client s3Client = S3Client.create();
     private final DynamoDbClient dynamoDbClient = DynamoDbClient.create();
-    private static final String TABLE_NAME = "FileProcessingResults";
+    private static final String TABLE_NAME = "YOUR_TABLE_NAME";
     
     @Override
     public String handleRequest(S3Event event, Context context) {
@@ -142,108 +142,95 @@ public  class TextFileProcessor implements RequestHandler<S3Event, String> {
  </pre>
 - pom.xml:
 ```
- <project xmlns="http://maven.apache.org/POM/4.0.0"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.fileprocessor</groupId>
-	<artifactId>text-file-processor</artifactId>
-	<version>1.0</version>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compiler.source>17</maven.compiler.source>
-		<maven.compiler.target>17</maven.compiler.target>
-		<aws.sdk.version>2.25.12</aws.sdk.version>
-	</properties>
-	<dependencies>
-		<!--  AWS SDK v2 for S3  -->
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
-			<version>${aws.sdk.version}</version>
-		</dependency>
-		<!--  AWS SDK v2 for DynamoDB  -->
-		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>dynamodb</artifactId>
-			<version>${aws.sdk.version}</version>
-		</dependency>
-		<!--  AWS Lambda Java Core  -->
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-lambda-java-core</artifactId>
-			<version>1.2.3</version>
-		</dependency>
-		<!--  AWS Lambda Java Events (for S3Event)  -->
-		<dependency>
-			<groupId>com.amazonaws</groupId>
-			<artifactId>aws-lambda-java-events</artifactId>
-			<version>3.11.4</version>
-		</dependency>
-		<!--  Logging (optional but recommended)  -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-simple</artifactId>
-			<version>2.0.13</version>
-		</dependency>
-	</dependencies>
-	<build>
-		<plugins>
-			<!--  Compiler Plugin  -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>3.11.0</version>
-				<configuration>
-					<source>17</source>
-					<target>17</target>
-				</configuration>
-			</plugin>
-			<!--  Shade Plugin to create a fat JAR (required for Lambda
-			deployment)  -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.5.3</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-						<configuration>
-							<createDependencyReducedPom>false</createDependencyReducedPom>
-							<transformers>
-								<transformer
-									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-									<mainClass>com.fileprocessor.TextFileProcessor</mainClass>
-								</transformer>
-							</transformers>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+ <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.encora</groupId>
+  <artifactId>AWS-TextFileProcessor</artifactId>
+  <version>1.0</version>
+  <name>AWS-TextFileProcessor</name>
+  
+   <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <aws.sdk.version>2.25.12</aws.sdk.version>
+    </properties>
+
+    <dependencies>
+        <!-- AWS SDK v2 for S3 -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+
+        <!-- AWS SDK v2 for DynamoDB -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>dynamodb</artifactId>
+            <version>${aws.sdk.version}</version>
+        </dependency>
+
+        <!-- AWS Lambda Java Core -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-core</artifactId>
+            <version>1.2.3</version>
+        </dependency>
+
+        <!-- AWS Lambda Java Events (for S3Event) -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-lambda-java-events</artifactId>
+            <version>3.11.4</version>
+        </dependency>
+
+        <!-- Logging (optional but recommended) -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>2.0.13</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Compiler Plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <source>17</source>
+                    <target>17</target>
+                </configuration>
+            </plugin>
+
+            <!-- Shade Plugin to create a fat JAR (required for Lambda deployment) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.example.TextFileProcessor</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
-```
-- log4j2.xml in src/main/resources
-```
-<?xml version="1.0" encoding="UTF-8"?>
-<Configuration packages="com.amazonaws.cloudwatch.emf.logger">
-    <Appenders>
-        <Console name="LambdaConsole" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{ISO8601} %p %c{1} - %m%n" />
-        </Console>
-    </Appenders>
-    <Loggers>
-        <Root level="info">
-            <AppenderRef ref="LambdaConsole" />
-        </Root>
-        <Logger name="com.fileprocessor" level="debug" />
-        <Logger name="com.amazonaws" level="warn" />
-    </Loggers>
-</Configuration>
 ```
 - [Used this .jar file](https://github.com/srivenkataprabhas-g1/Encora-Tasks/blob/main/31-10-2025/Task%203/TextFileProcessor.jar)
 ## S3 Event Configuration
