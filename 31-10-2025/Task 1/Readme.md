@@ -78,7 +78,7 @@ Note: The HTML form should use CSS and Bootstrap.
 
 <strong>Code:</strong>
 <pre>
- import json
+import json
 import boto3
 import uuid
 from datetime import datetime
