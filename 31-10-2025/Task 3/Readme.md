@@ -57,397 +57,175 @@ Configure an event notification to trigger Lambda on .txt file uploads
 - Error handling
 # Solution
 ## Java Source Codes:
-- TextFileProcessor
-<pre>
- package com.fileprocessor;
+- TextFileProcessor Code:
+ <pre>
+package com.fileprocessor;
 
-import com.amazonaws.services.lambda.runtime.Context;
-import com.amazonaws.services.lambda.runtime.RequestHandler;
-import com.amazonaws.services.lambda.runtime.events.S3Event;
-import com.amazonaws.services.lambda.runtime.events.models.s3.S3EventNotification;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-public class TextFileProcessor implements RequestHandler<S3Event, String> {
-    
-    private static final Logger logger = LogManager.getLogger(TextFileProcessor.class);
-    private final S3FileReader s3FileReader;
-    private final FileProcessor fileProcessor;
-    private final DynamoDBWriter dynamoDBWriter;
-
-    public TextFileProcessor() {
-        this.s3FileReader = new S3FileReader();
-        this.fileProcessor = new FileProcessor();
-        this.dynamoDBWriter = new DynamoDBWriter();
-    }
-
-    @Override
-    public String handleRequest(S3Event event, Context context) {
-        try {
-            logger.info("Received S3 event: {}", event);
-            
-            // Extract S3 bucket and key from event
-            S3EventNotification.S3EventNotificationRecord record = event.getRecords().get(0);
-            String bucket = record.getS3().getBucket().getName();
-            String key = record.getS3().getObject().getKey();
-            
-            logger.info("Processing file - Bucket: {}, Key: {}", bucket, key);
-            
-            // Validate file extension
-            if (!key.toLowerCase().endsWith(".txt")) {
-                logger.warn("Ignoring non-text file: {}", key);
-                return "File is not a .txt file";
-            }
-            
-            // Read file from S3
-            String fileContent = s3FileReader.readFileFromS3(bucket, key);
-            logger.info("File content read successfully, size: {} bytes", fileContent.length());
-            
-            // Process file content
-            FileProcessingResult result = fileProcessor.processFileContent(key, fileContent);
-            logger.info("File processed - Lines: {}, Words: {}, Characters: {}", 
-                result.getLineCount(), result.getWordCount(), result.getCharCount());
-            
-            // Store result in DynamoDB
-            dynamoDBWriter.writeResultToDynamoDB(result);
-            logger.info("Result stored in DynamoDB for file: {}", key);
-            
-            return "Successfully processed file: " + key;
-            
-        } catch (Exception e) {
-            logger.error("Error processing S3 event: {}", e.getMessage(), e);
-            throw new RuntimeException("Error processing file", e);
-        }
-    }
-}
-</pre>
-- S3FileReader
-<pre>
- package com.fileprocessor;
-
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.AmazonS3ClientBuilder;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.S3Object;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.stream.Collectors;
-
-public class S3FileReader {
-    
-    private static final Logger logger = LogManager.getLogger(S3FileReader.class);
-    private final AmazonS3 s3Client;
-
-    public S3FileReader() {
-        this.s3Client = AmazonS3ClientBuilder.standard().build();
-    }
-
-    /**
-     * Reads a text file from S3 and returns its content as a String
-     *
-     * @param bucketName S3 bucket name
-     * @param objectKey   S3 object key (file path)
-     * @return File content as String
-     */
-    public String readFileFromS3(String bucketName, String objectKey) {
-        try {
-            logger.info("Reading file from S3 - Bucket: {}, Key: {}", bucketName, objectKey);
-            
-            GetObjectRequest getObjectRequest = new GetObjectRequest(bucketName, objectKey);
-            S3Object s3Object = s3Client.getObject(getObjectRequest);
-            
-            // Read the S3 object content
-            String fileContent = new BufferedReader(
-                    new InputStreamReader(s3Object.getObjectContent(), StandardCharsets.UTF_8))
-                    .lines()
-                    .collect(Collectors.joining("\n"));
-            
-            logger.info("Successfully read file from S3. Size: {} characters", fileContent.length());
-            return fileContent;
-            
-        } catch (Exception e) {
-            logger.error("Error reading file from S3: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to read file from S3", e);
-        }
-    }
-}
-</pre>
-- FileProcessor
-<pre>
- package com.fileprocessor;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-public class FileProcessor {
-    
-    private static final Logger logger = LogManager.getLogger(FileProcessor.class);
-    private static final int PREVIEW_LENGTH = 100;
-
-    /**
-     * Processes file content and extracts statistics
-     *
-     * @param fileName    Name of the file
-     * @param fileContent Content of the file
-     * @return FileProcessingResult with statistics
-     */
-    public FileProcessingResult processFileContent(String fileName, String fileContent) {
-        try {
-            logger.info("Starting file processing for: {}", fileName);
-            
-            // Count lines
-            int lineCount = countLines(fileContent);
-            
-            // Count words
-            int wordCount = countWords(fileContent);
-            
-            // Count characters (excluding newlines for accurate count)
-            int charCount = fileContent.length();
-            
-            // Extract preview
-            String preview = extractPreview(fileContent, PREVIEW_LENGTH);
-            
-            logger.info("File statistics - Lines: {}, Words: {}, Characters: {}", 
-                lineCount, wordCount, charCount);
-            
-            FileProcessingResult result = new FileProcessingResult(
-                fileName,
-                lineCount,
-                wordCount,
-                charCount,
-                preview
-            );
-            
-            logger.info("File processing completed successfully");
-            return result;
-            
-        } catch (Exception e) {
-            logger.error("Error processing file content: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to process file content", e);
-        }
-    }
-
-    /**
-     * Counts the number of lines in the content
-     */
-    private int countLines(String content) {
-        if (content == null || content.isEmpty()) {
-            return 0;
-        }
-        return (int) content.lines().count();
-    }
-
-    /**
-     * Counts the number of words in the content
-     */
-    private int countWords(String content) {
-        if (content == null || content.isEmpty()) {
-            return 0;
-        }
-        
-        // Split by whitespace and count non-empty tokens
-        String[] words = content.trim().split("\\s+");
-        int count = 0;
-        
-        for (String word : words) {
-            if (!word.isEmpty()) {
-                count++;
-            }
-        }
-        
-        return count;
-    }
-
-    /**
-     * Extracts preview of the file content
-     */
-    private String extractPreview(String content, int length) {
-        if (content == null) {
-            return "";
-        }
-        
-        if (content.length() <= length) {
-            return content;
-        }
-        
-        // Truncate and add ellipsis
-        return content.substring(0, length) + "...";
-    }
-}
-</pre>
-- DynamoDBWriter
-<pre>
- package com.fileprocessor;
-
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
-import com.amazonaws.services.dynamodbv2.model.PutItemRequest;
-import com.amazonaws.services.dynamodbv2.model.PutItemResult;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
+import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class DynamoDBWriter {
-    
-    private static final Logger logger = LogManager.getLogger(DynamoDBWriter.class);
+import com.amazonaws.services.lambda.runtime.Context;
+
+import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.model.*;
+import com.amazonaws.services.lambda.runtime.RequestHandler;
+import com.amazonaws.services.lambda.runtime.events.S3Event;
+
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.*;
+
+public  class TextFileProcessor implements RequestHandler<S3Event, String> {
+
+    private final S3Client s3Client = S3Client.create();
+    private final DynamoDbClient dynamoDbClient = DynamoDbClient.create();
     private static final String TABLE_NAME = "FileProcessingResults";
-    private final AmazonDynamoDB dynamoDBClient;
-
-    public DynamoDBWriter() {
-        this.dynamoDBClient = AmazonDynamoDBClientBuilder.standard().build();
-    }
-
-    /**
-     * Writes processing result to DynamoDB
-     *
-     * @param result FileProcessingResult to store
-     */
-    public void writeResultToDynamoDB(FileProcessingResult result) {
+    
+    @Override
+    public String handleRequest(S3Event event, Context context) {
         try {
-            logger.info("Writing result to DynamoDB for file: {}", result.getFileName());
-            
-            // Create item attributes
+            var record = event.getRecords().get(0);
+            String bucket = record.getS3().getBucket().getName();
+            String key = record.getS3().getObject().getKey();
+
+           context.getLogger().log("Processing file: " + key);
+
+            // Read file from S3
+            GetObjectResponse s3Object = s3Client.getObject(
+                GetObjectRequest.builder().bucket(bucket).key(key).build(),
+                (response, inputStream) -> {
+                    try {
+                        return response;
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            );
+
+            InputStream inputStream = s3Client.getObject(GetObjectRequest.builder().bucket(bucket).key(key).build());
+            String content = new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
+
+            // Count lines, words, characters
+            long lineCount = content.lines().count();
+            long wordCount = Arrays.stream(content.split("\\s+")).filter(s -> !s.isBlank()).count();
+            long charCount = content.length();
+
+            // Get preview
+            String preview = content.length() > 100 ? content.substring(0, 100) : content;
+
+            // Store results in DynamoDB
             Map<String, AttributeValue> item = new HashMap<>();
-            
-            // Add partition key
-            item.put("fileName", new AttributeValue(result.getFileName()));
-            
-            // Add other attributes
-            item.put("lineCount", new AttributeValue().withN(String.valueOf(result.getLineCount())));
-            item.put("wordCount", new AttributeValue().withN(String.valueOf(result.getWordCount())));
-            item.put("charCount", new AttributeValue().withN(String.valueOf(result.getCharCount())));
-            item.put("preview", new AttributeValue(result.getPreview()));
-            item.put("processedDate", new AttributeValue(result.getProcessedDate()));
-            
-            // Create PutItem request
-            PutItemRequest putItemRequest = new PutItemRequest()
-                    .withTableName(TABLE_NAME)
-                    .withItem(item);
-            
-            // Execute put operation
-            PutItemResult result_response = dynamoDBClient.putItem(putItemRequest);
-            
-            logger.info("Successfully written to DynamoDB. Response status code: {}", 
-                result_response.getSdkHttpMetadata().getHttpStatusCode());
-            
+            item.put("fileName", AttributeValue.builder().s(key).build());
+            item.put("lineCount", AttributeValue.builder().n(String.valueOf(lineCount)).build());
+            item.put("wordCount", AttributeValue.builder().n(String.valueOf(wordCount)).build());
+            item.put("charCount", AttributeValue.builder().n(String.valueOf(charCount)).build());
+            item.put("preview", AttributeValue.builder().s(preview).build());
+            item.put("processedDate", AttributeValue.builder().s(Instant.now().toString()).build());
+
+            dynamoDbClient.putItem(PutItemRequest.builder()
+                    .tableName(TABLE_NAME)
+                    .item(item)
+                    .build());
+
+            context.getLogger().log("File processed successfully: " + key);
+            return "Success";
+
         } catch (Exception e) {
-            logger.error("Error writing to DynamoDB: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to write result to DynamoDB", e);
+            context.getLogger().log("Error: " + e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 }
-</pre>
-- FileProcessingResult
+ </pre>
+- pom.xml:
 <pre>
- package com.fileprocessor;
-
-import com.google.gson.annotations.SerializedName;
-import java.time.Instant;
-
-public class FileProcessingResult {
-    
-    @SerializedName("fileName")
-    private String fileName;
-    
-    @SerializedName("lineCount")
-    private int lineCount;
-    
-    @SerializedName("wordCount")
-    private int wordCount;
-    
-    @SerializedName("charCount")
-    private int charCount;
-    
-    @SerializedName("preview")
-    private String preview;
-    
-    @SerializedName("processedDate")
-    private String processedDate;
-
-    // Default constructor for DynamoDB mapping
-    public FileProcessingResult() {
-        this.processedDate = Instant.now().toString();
-    }
-
-    // Constructor with parameters
-    public FileProcessingResult(String fileName, int lineCount, int wordCount, 
-                               int charCount, String preview) {
-        this.fileName = fileName;
-        this.lineCount = lineCount;
-        this.wordCount = wordCount;
-        this.charCount = charCount;
-        this.preview = preview;
-        this.processedDate = Instant.now().toString();
-    }
-
-    // Getters and Setters
-    public String getFileName() {
-        return fileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.fileName = fileName;
-    }
-
-    public int getLineCount() {
-        return lineCount;
-    }
-
-    public void setLineCount(int lineCount) {
-        this.lineCount = lineCount;
-    }
-
-    public int getWordCount() {
-        return wordCount;
-    }
-
-    public void setWordCount(int wordCount) {
-        this.wordCount = wordCount;
-    }
-
-    public int getCharCount() {
-        return charCount;
-    }
-
-    public void setCharCount(int charCount) {
-        this.charCount = charCount;
-    }
-
-    public String getPreview() {
-        return preview;
-    }
-
-    public void setPreview(String preview) {
-        this.preview = preview;
-    }
-
-    public String getProcessedDate() {
-        return processedDate;
-    }
-
-    public void setProcessedDate(String processedDate) {
-        this.processedDate = processedDate;
-    }
-
-    @Override
-    public String toString() {
-        return "FileProcessingResult{" +
-                "fileName='" + fileName + '\'' +
-                ", lineCount=" + lineCount +
-                ", wordCount=" + wordCount +
-                ", charCount=" + charCount +
-                ", preview='" + preview + '\'' +
-                ", processedDate='" + processedDate + '\'' +
-                '}';
-    }
-}
+ <project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.fileprocessor</groupId>
+	<artifactId>text-file-processor</artifactId>
+	<version>1.0</version>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.source>17</maven.compiler.source>
+		<maven.compiler.target>17</maven.compiler.target>
+		<aws.sdk.version>2.25.12</aws.sdk.version>
+	</properties>
+	<dependencies>
+		<!--  AWS SDK v2 for S3  -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>${aws.sdk.version}</version>
+		</dependency>
+		<!--  AWS SDK v2 for DynamoDB  -->
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>dynamodb</artifactId>
+			<version>${aws.sdk.version}</version>
+		</dependency>
+		<!--  AWS Lambda Java Core  -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-core</artifactId>
+			<version>1.2.3</version>
+		</dependency>
+		<!--  AWS Lambda Java Events (for S3Event)  -->
+		<dependency>
+			<groupId>com.amazonaws</groupId>
+			<artifactId>aws-lambda-java-events</artifactId>
+			<version>3.11.4</version>
+		</dependency>
+		<!--  Logging (optional but recommended)  -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>2.0.13</version>
+		</dependency>
+	</dependencies>
+	<build>
+		<plugins>
+			<!--  Compiler Plugin  -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.11.0</version>
+				<configuration>
+					<source>17</source>
+					<target>17</target>
+				</configuration>
+			</plugin>
+			<!--  Shade Plugin to create a fat JAR (required for Lambda
+			deployment)  -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>3.5.3</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
+							<transformers>
+								<transformer
+									implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>com.fileprocessor.TextFileProcessor</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>
 </pre>
 - [Used this .jar file](https://github.com/srivenkataprabhas-g1/Encora-Tasks/blob/main/31-10-2025/Task%203/TextFileProcessor.jar)
 ## S3 Event Configuration
