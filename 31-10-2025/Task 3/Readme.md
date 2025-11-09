@@ -141,7 +141,7 @@ public  class TextFileProcessor implements RequestHandler<S3Event, String> {
 }
  </pre>
 - pom.xml:
-<pre>
+```
  <project xmlns="http://maven.apache.org/POM/4.0.0"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
@@ -226,7 +226,7 @@ public  class TextFileProcessor implements RequestHandler<S3Event, String> {
 		</plugins>
 	</build>
 </project>
-</pre>
+```
 - [Used this .jar file](https://github.com/srivenkataprabhas-g1/Encora-Tasks/blob/main/31-10-2025/Task%203/TextFileProcessor.jar)
 ## S3 Event Configuration
 
