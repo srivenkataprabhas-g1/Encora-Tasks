@@ -227,6 +227,24 @@ public  class TextFileProcessor implements RequestHandler<S3Event, String> {
 	</build>
 </project>
 ```
+- log4j2.xml in src/main/resources
+```
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration packages="com.amazonaws.cloudwatch.emf.logger">
+    <Appenders>
+        <Console name="LambdaConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{ISO8601} %p %c{1} - %m%n" />
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="LambdaConsole" />
+        </Root>
+        <Logger name="com.fileprocessor" level="debug" />
+        <Logger name="com.amazonaws" level="warn" />
+    </Loggers>
+</Configuration>
+```
 - [Used this .jar file](https://github.com/srivenkataprabhas-g1/Encora-Tasks/blob/main/31-10-2025/Task%203/TextFileProcessor.jar)
 ## S3 Event Configuration
 
