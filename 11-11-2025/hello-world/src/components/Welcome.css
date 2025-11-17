@@ -1,0 +1,32 @@
+/* src/components/Welcome.css */
+
+.welcome-text {
+  text-align: center;
+  animation: moveText 6s ease-in-out infinite;
+  position: relative;
+}
+
+@keyframes moveText {
+  0% {
+    left: 0;
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-33%); /* move left */
+  }
+  50% {
+    transform: translateX(0); /* return to center */
+  }
+  75% {
+    transform: translateX(33%); /* move right */
+  }
+  100% {
+    transform: translateX(0); /* back to center */
+  }
+}
+
+.welcome-text h1 {
+  margin: 0;
+  font-size: 1.8em;
+  white-space: nowrap;
+}

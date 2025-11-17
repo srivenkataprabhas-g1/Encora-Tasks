@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- 
+    ============================================
+    HEAD SECTION - Metadata and Configuration
+    ============================================
+    The <head> tag contains metadata about the HTML document.
+    It includes character encoding, viewport settings, title, and links to external resources.
+    -->
+
+    <!-- Character Encoding: Specifies the character set as UTF-8 for proper text rendering -->
+    <meta charset="UTF-8" />
+
+    <!-- Viewport Meta Tag: Controls how the page is displayed on mobile devices
+         - width=device-width: Sets the width to the device's screen width
+         - initial-scale=1.0: Sets initial zoom level to 100%
+         This ensures responsive design works properly on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Page Title: Appears in the browser tab -->
+    <title>React Application with Components Explained</title>
+
+    <!-- 
+    ============================================
+    CSS STYLING SECTION
+    ============================================
+    Inline CSS styles for the application.
+    In production, this would typically be in external CSS files or CSS-in-JS libraries.
+    -->
+    <style>
+        /* Global Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styles: Base styling for the entire page */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        /* Container Styles: Main wrapper for React app */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        /* Header Styles */
+        .app-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .app-header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .app-header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        /* Main Content Area */
+        .app-content {
+            padding: 40px;
+        }
+
+        /* Section Styles */
+        .section {
+            margin-bottom: 40px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border-left: 5px solid #667eea;
+        }
+
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.8em;
+        }
+
+        .section p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        /* Component Card Styles */
+        .component-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+        }
+
+        .component-card:hover {
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .component-card h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .component-card p {
+            color: #555;
+            font-size: 0.95em;
+        }
+
+        /* Button Styles */
+        button {
+            background-color: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 1em;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #764ba2;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* Input Styles */
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        /* List Styles */
+        ul,
+        ol {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        li {
+            margin: 8px 0;
+            color: #555;
+        }
+
+        /* Code Block Styles */
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+
+        /* Footer Styles */
+        .app-footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            color: #666;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .app-header h1 {
+                font-size: 1.8em;
+            }
+
+            .app-content {
+                padding: 20px;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 
+    ============================================
+    BODY SECTION - Main Content
+    ============================================
+    The <body> tag contains the visible content of the webpage.
+    It includes a single <div id="root"> where React will render its components.
+    -->
+
+    <!-- Root Container: This is where React components will be mounted -->
+    <div id="root"></div>
+
+    <!-- 
+    ============================================
+    REACT LIBRARY SCRIPTS
+    ============================================
+    These script tags import React, ReactDOM, and Babel from CDN (Content Delivery Network).
+    This allows us to run React code directly in the browser without build tools.
+    -->
+
+    <!-- React Library: Core React functionality -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+
+    <!-- ReactDOM: Allows React to render components to the DOM -->
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+    <!-- Babel Standalone: Transpiles JSX into JavaScript that browsers understand -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 
+    ============================================
+    REACT COMPONENTS - Application Logic
+    ============================================
+    This section contains all React components and the main application logic.
+    The type="text/babel" tells Babel to transpile JSX code.
+    -->
+
+    <script type="text/babel">
+        // ============================================
+        // 1. HEADER COMPONENT
+        // ============================================
+        // Purpose: Displays the main header of the application
+        // Props: title (string), subtitle (string)
+        // This component is reusable and receives data via props
+
+        function Header({ title, subtitle }) {
+            return (
+                <header className="app-header">
+                    <h1>{title}</h1>
+                    <p>{subtitle}</p>
+                </header>
+            );
+        }
+
+        // ============================================
+        // 2. CARD COMPONENT
+        // ============================================
+        // Purpose: Reusable card component to display information
+        // Props: title (string), description (string)
+        // Demonstrates component composition and prop passing
+
+        function Card({ title, description }) {
+            return (
+                <div className="component-card">
+                    <h3>{title}</h3>
+                    <p>{description}</p>
+                </div>
+            );
+        }
+
+        // ============================================
+        // 3. COUNTER COMPONENT
+        // ============================================
+        // Purpose: Demonstrates React state management using useState Hook
+        // State: count (number) - tracks the current count value
+        // Functions: increment and decrement the counter
+
+        function Counter() {
+            // useState Hook: Creates state variable 'count' and setter function 'setCount'
+            // Initial value is 0
+            const [count, setCount] = React.useState(0);
+
+            // Increment function: Increases count by 1
+            const increment = () => setCount(count + 1);
+
+            // Decrement function: Decreases count by 1
+            const decrement = () => setCount(count - 1);
+
+            // Reset function: Sets count back to 0
+            const reset = () => setCount(0);
+
+            return (
+                <div className="section">
+                    <h2>Counter Component (useState Hook)</h2>
+                    <p>This component demonstrates state management using the useState Hook.</p>
+
+                    <div style={{ fontSize: '2em', margin: '20px 0', textAlign: 'center', color: '#667eea' }}>
+                        Current Count: {count}
+                    </div>
+
+                    <div style={{ textAlign: 'center' }}>
+                        <button onClick={increment}>+ Increment</button>
+                        <button onClick={decrement}>- Decrement</button>
+                        <button onClick={reset}>Reset</button>
+                    </div>
+
+                    <p style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                        <strong>How it works:</strong> Each button click triggers a function that updates
+                        the state using setCount(). React automatically re-renders the component with the new value.
+                    </p>
+                </div>
+            );
+        }
+
+        // ============================================
+        // 4. TODO LIST COMPONENT
+        // ============================================
+        // Purpose: Demonstrates form handling, input management, and list rendering
+        // State: todos (array of objects), inputValue (string)
+        // Demonstrates controlled components and dynamic list rendering
+
+        function TodoList() {
+            // State for storing the list of todos
+            const [todos, setTodos] = React.useState([
+                { id: 1, text: 'Learn React Basics' },
+                { id: 2, text: 'Understand JSX' },
+                { id: 3, text: 'Master Hooks' }
+            ]);
+
+            // State for the input field (controlled component)
+            const [inputValue, setInputValue] = React.useState('');
+
+            // Add todo function
+            const addTodo = () => {
+                if (inputValue.trim() === '') {
+                    alert('Please enter a todo!');
+                    return;
+                }
+
+                // Create new todo object
+                const newTodo = {
+                    id: Date.now(), // Simple unique ID using timestamp
+                    text: inputValue
+                };
+
+                // Add new todo to the list
+                setTodos([...todos, newTodo]); // Spread operator to create new array
+
+                // Clear the input field
+                setInputValue('');
+            };
+
+            // Remove todo function
+            const removeTodo = (id) => {
+                // Filter out the todo with matching id
+                setTodos(todos.filter(todo => todo.id !== id));
+            };
+
+            return (
+                <div className="section">
+                    <h2>Todo List Component (Controlled Components)</h2>
+                    <p>This component demonstrates form handling and dynamic list rendering.</p>
+
+                    {/* Input Section */}
+                    <div>
+                        <input
+                            type="text"
+                            placeholder="Enter a new todo..."
+                            value={inputValue}
+                            onChange={(e) => setInputValue(e.target.value)}
+                            onKeyPress={(e) => {
+                                if (e.key === 'Enter') addTodo();
+                            }}
+                        />
+                        <button onClick={addTodo}>Add Todo</button>
+                    </div>
+
+                    {/* Todo List Display */}
+                    <ul style={{ marginTop: '15px', listStyle: 'none' }}>
+                        {todos.map((todo) => (
+                            <li
+                                key={todo.id}
+                                style={{
+                                    background: 'white',
+                                    padding: '10px',
+                                    margin: '8px 0',
+                                    borderRadius: '5px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}
+                            >
+                                <span>{todo.text}</span>
+                                <button
+                                    onClick={() => removeTodo(todo.id)}
+                                    style={{ background: '#e74c3c' }}
+                                >
+                                    Delete
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+
+                    <p style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                        <strong>Key Concepts:</strong>
+                        <ul>
+                            <li>Input is a <code>controlled component</code> - React state controls its value</li>
+                            <li><code>map()</code> function renders each todo dynamically</li>
+                            <li><code>key</code> prop helps React identify which items have changed</li>
+                            <li><code>filter()</code> creates new array when deleting todos</li>
+                        </ul>
+                    </p>
+                </div>
+            );
+        }
+
+        // ============================================
+        // 5. EFFECT COMPONENT (useEffect Hook)
+        // ============================================
+        // Purpose: Demonstrates the useEffect Hook for side effects
+        // Common uses: API calls, subscriptions, timers, DOM manipulation
+
+        function EffectDemo() {
+            // State for tracking effect executions
+            const [effectCount, setEffectCount] = React.useState(0);
+            const [mounted, setMounted] = React.useState(true);
+
+            // useEffect Hook with empty dependency array
+            // Runs ONCE after component mounts (like componentDidMount)
+            React.useEffect(() => {
+                console.log('Component mounted - Effect ran once');
+                setEffectCount(1);
+
+                // Cleanup function (runs on unmount)
+                return () => {
+                    console.log('Component unmounting - Cleanup running');
+                };
+            }, []); // Empty dependency array = runs once
+
+            return (
+                <div className="section">
+                    <h2>useEffect Hook Demo</h2>
+                    <p>This component demonstrates the useEffect Hook for side effects.</p>
+
+                    <div style={{ background: 'white', padding: '15px', borderRadius: '5px' }}>
+                        <p>
+                            <strong>Effect Count:</strong> {effectCount}
+                        </p>
+                        <p style={{ fontSize: '0.9em', color: '#666' }}>
+                            Check the browser console to see when effects run.
+                            The effect in this component runs only once when the component mounts.
+                        </p>
+                    </div>
+
+                    <p style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                        <strong>useEffect Common Patterns:</strong>
+                        <ul>
+                            <li><code>useEffect(fn, [])</code> - Runs once on mount</li>
+                            <li><code>useEffect(fn, [dep])</code> - Runs when dependency changes</li>
+                            <li><code>useEffect(fn)</code> - Runs after every render</li>
+                            <li><code>return () => { }</code> - Cleanup function on unmount</li>
+                        </ul>
+                    </p>
+                </div>
+            );
+        }
+
+        // ============================================
+        // 6. PROFILE CARD COMPONENT
+        // ============================================
+        // Purpose: Demonstrates component composition and props
+        // Shows how to pass data from parent to child components
+
+        function ProfileCard({ name, email, role }) {
+            return (
+                <div className="component-card">
+                    <h3>👤 {name}</h3>
+                    <p><strong>Email:</strong> {email}</p>
+                    <p><strong>Role:</strong> {role}</p>
+                </div>
+            );
+        }
+
+        // ============================================
+        // 7. PROFILE LIST COMPONENT
+        // ============================================
+        // Purpose: Demonstrates rendering multiple components
+        // Uses map() to iterate over an array and create components
+
+        function ProfileList() {
+            // Array of profile data
+            const profiles = [
+                { id: 1, name: 'Alice Johnson', email: 'alice@example.com', role: 'Frontend Developer' },
+                { id: 2, name: 'Bob Smith', email: 'bob@example.com', role: 'Backend Developer' },
+                { id: 3, name: 'Carol White', email: 'carol@example.com', role: 'Full Stack Developer' }
+            ];
+
+            return (
+                <div className="section">
+                    <h2>Profile List Component (Component Composition)</h2>
+                    <p>This demonstrates rendering multiple instances of a component using map().</p>
+
+                    {/* Map over profiles array and create ProfileCard for each */}
+                    {profiles.map((profile) => (
+                        <ProfileCard
+                            key={profile.id}
+                            name={profile.name}
+                            email={profile.email}
+                            role={profile.role}
+                        />
+                    ))}
+
+                    <p style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                        <strong>Key Concepts:</strong>
+                        <ul>
+                            <li><code>map()</code> creates a new component for each item</li>
+                            <li><code>key</code> prop helps React track list items efficiently</li>
+                            <li>Props pass data from parent to child components</li>
+                        </ul>
+                    </p>
+                </div>
+            );
+        }
+
+        // ============================================
+        // 8. CONDITIONAL RENDERING COMPONENT
+        // ============================================
+        // Purpose: Demonstrates conditional rendering techniques
+        // Shows different ways to render content based on conditions
+
+        function ConditionalRender() {
+            const [isVisible, setIsVisible] = React.useState(false);
+            const [userType, setUserType] = React.useState('guest');
+
+            return (
+                <div className="section">
+                    <h2>Conditional Rendering</h2>
+                    <p>This component shows different content based on conditions.</p>
+
+                    {/* Toggle visibility button */}
+                    <button onClick={() => setIsVisible(!isVisible)}>
+                        {isVisible ? 'Hide' : 'Show'} Secret Message
+                    </button>
+
+                    {/* Conditional rendering using ternary operator */}
+                    {isVisible && (
+                        <div style={{ background: '#fff3cd', padding: '10px', marginTop: '10px', borderRadius: '5px' }}>
+                            🎉 This is a secret message that appears when isVisible is true!
+                        </div>
+                    )}
+
+                    {/* User type selector */}
+                    <div style={{ marginTop: '20px' }}>
+                        <p><strong>Select User Type:</strong></p>
+                        <button onClick={() => setUserType('guest')}>Guest</button>
+                        <button onClick={() => setUserType('user')}>User</button>
+                        <button onClick={() => setUserType('admin')}>Admin</button>
+                    </div>
+
+                    {/* Conditional rendering based on userType */}
+                    <div style={{ background: 'white', padding: '15px', marginTop: '10px', borderRadius: '5px' }}>
+                        {userType === 'guest' && <p>Welcome Guest! Please log in to access more features.</p>}
+                        {userType === 'user' && <p>Welcome User! You have access to basic features.</p>}
+                        {userType === 'admin' && <p>Welcome Admin! You have full access to all features.</p>}
+                    </div>
+
+                    <p style={{ marginTop: '15px', fontSize: '0.9em' }}>
+                        <strong>Conditional Rendering Techniques:</strong>
+                        <ul>
+                            <li><code>if/else</code> statements (before return)</li>
+                            <li><code>ternary operator</code> - Inline: <code>condition ? true : false</code></li>
+                            <li><code>logical AND</code> - <code>condition && element</code></li>
+                        </ul>
+                    </p>
+                </div>
+            );
+        }
+
+        // ============================================
+        // 9. MAIN APP COMPONENT
+        // ============================================
+        // Purpose: Root component that brings everything together
+        // This is the main component that combines all other components
+        function Tick() {
+            var arr=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+            var date=new Date();
+            setInterval(() => {
+                ReactDOM.render(
+                    <Tick />,
+                    document.getElementById('clock')
+                );
+            }, 1000);
+            return (
+                <div id="clock" className="section">
+                    <h1>Hello, world!</h1>
+                    <h2>It is {arr[date.getDay()]},{date.toLocaleDateString()},{date.toLocaleTimeString()}.</h2>
+                </div>
+            );
+        }
+        function App() {
+            return (
+                <div className="container">
+                    {/* Header Component */}
+                    <Header
+                        title="React Components Explained"
+                        subtitle="A comprehensive guide to React components, hooks, and best practices"
+                    />
+
+                    {/* Main Content */}
+                    <main className="app-content">
+                        {/* Introduction Section */}
+                        <section className="section">
+                            <h2>Welcome to React!</h2>
+                            <p>
+                                This page demonstrates fundamental React concepts including components,
+                                hooks (useState, useEffect), state management, conditional rendering,
+                                and component composition.
+                            </p>
+                            <p>
+                                <strong>Open your browser's Developer Console (F12) to see console logs
+                                    from the useEffect Hook!</strong>
+                            </p>
+                        </section>
+
+                        {/* All Components */}
+                        <Tick />
+                        <Counter />
+                        <TodoList />
+                        <EffectDemo />
+                        <ProfileList />
+                        <ConditionalRender />
+
+                        {/* Additional Info */}
+                        <section className="section">
+                            <h2>Key Concepts Covered</h2>
+                            <ul>
+                                <li><strong>Components:</strong> Reusable UI building blocks</li>
+                                <li><strong>JSX:</strong> HTML-like syntax in JavaScript</li>
+                                <li><strong>Props:</strong> Data passed from parent to child components</li>
+                                <li><strong>State:</strong> Data managed within a component using useState</li>
+                                <li><strong>Hooks:</strong> Functions to add state and effects to components</li>
+                                <li><strong>Rendering:</strong> Displaying components and conditional content</li>
+                                <li><strong>Event Handling:</strong> Responding to user interactions</li>
+                            </ul>
+                        </section>
+                    </main>
+
+                    {/* Footer */}
+                    <footer className="app-footer">
+                        <p>React Application Demo | Learn React Components and Hooks</p>
+                        <p style={{ fontSize: '0.9em', marginTop: '10px' }}>
+                            © 2025 React Learning Example | All Rights Reserved
+                        </p>
+                    </footer>
+                </div>
+            );
+        }
+
+        // ============================================
+        // APPLICATION INITIALIZATION
+        // ============================================
+        // This code renders the main App component into the root div
+
+        // Get the root container element from the HTML
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        // Render the App component into the root
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
